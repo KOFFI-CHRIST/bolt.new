@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent IA - Création de Boutique en Ligne</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --border-radius: 8px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7ff;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo svg {
+            margin-right: 10px;
+        }
+        
+        .webhook-config {
+            display: flex;
+            align-items: center;
+        }
+        
+        .config-button {
+            background-color: var(--light);
+            color: var(--dark);
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .config-button:hover {
+            background-color: #e9ecef;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .webhook-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #adb5bd;
+        }
+        
+        .status-indicator.connected {
+            background-color: #2ecc71;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-cancel {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-left: 15px;
+        }
+        
+        main {
+            margin-bottom: 40px;
+        }
+        
+        .chat-container {
+            display: flex;
+            gap: 20px;
+            height: 70vh;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+        
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-title {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success);
+            width: 35%;
+            transition: width 0.5s ease;
+        }
+        
+        .steps-container h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .step {
+            display: flex;
+            padding: 10px 0;
+            border-left: 2px solid #e9ecef;
+            padding-left: 15px;
+            position: relative;
+            margin-left: 10px;
+        }
+        
+        .step.completed {
+            border-left-color: var(--success);
+        }
+        
+        .step.active {
+            border-left-color: var(--primary);
+        }
+        
+        .step:before {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid #e9ecef;
+        }
+        
+        .step.completed:before {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+        
+        .step.active:before {
+            border-color: var(--primary);
+        }
+        
+        .step-content {
+            padding-bottom: 10px;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fafafa;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+        }
+        
+        .message-user {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message-bot .message-content {
+            background-color: #f0f2f5;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-user .message-content {
+            background-color: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid #e9ecef;
+            background-color: white;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-container input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .input-container input:focus {
+            border-color: var(--primary);
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+        }
+        
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .suggestion {
+            background-color: #f0f2f5;
+            padding: 8px 15px;
+            border-radius: 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .suggestion:hover {
+            background-color: #e2e6ea;
+        }
+        
+        .preview-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .preview-content {
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            min-height: 400px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .shop-preview {
+            display: none;
+            width: 100%;
+        }
+        
+        .shop-preview.active {
+            display: block;
+        }
+        
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        
+        .shop-logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .shop-nav {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .shop-nav-item {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .shop-nav-item:hover {
+            color: var(--primary);
+        }
+        
+        .shop-products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .product-card {
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .product-image {
+            height: 180px;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+        }
+        
+        .product-info {
+            padding: 15px;
+        }
+        
+        .product-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .product-price {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .control-panel {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                IA Shop Creator
+            </div>
+            <div class="webhook-config">
+                <button id="configure-webhook" class="config-button">⚙️ Configurer l'agent IA</button>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            <div class="chat-container">
+                <div class="sidebar">
+                    <div class="progress-container">
+                        <div class="progress-title">
+                            <span>Progression</span>
+                            <span>35%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="steps-container">
+                        <h3>Étapes de création</h3>
+                        <div class="step completed">
+                            <div class="step-content">
+                                <div class="step-title">Initialisation</div>
+                                <div class="step-desc">Projet créé</div>
+                            </div>
+                        </div>
+                        <div class="step completed">
+                            <div class="step-content">
+                                <div class="step-title">Informations de base</div>
+                                <div class="step-desc">Nom et secteur d'activité</div>
+                            </div>
+                        </div>
+                        <div class="step active">
+                            <div class="step-content">
+                                <div class="step-title">Catalogue produits</div>
+                                <div class="step-desc">Création des produits</div>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-content">
+                                <div class="step-title">Design</div>
+                                <div class="step-desc">Apparence de la boutique</div>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-content">
+                                <div class="step-title">Paiement</div>
+                                <div class="step-desc">Options de paiement</div>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-content">
+                                <div class="step-title">Finalisation</div>
+                                <div class="step-desc">Mise en ligne</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-main">
+                    <div class="chat-messages">
+                        <div class="message message-bot">
+                            <div class="message-content">
+                                <p>Bonjour ! Je suis votre assistant IA pour la création de votre boutique en ligne. Commençons par les bases. Quel type de produits souhaitez-vous vendre ?</p>
+                                <div class="message-time">14:30</div>
+                            </div>
+                        </div>
+                        
+                        <div class="message message-user">
+                            <div class="message-content">
+                                <p>Je voudrais créer une boutique de vêtements éco-responsables</p>
+                                <div class="message-time">14:31</div>
+                            </div>
+                        </div>
+                        
+                        <div class="message message-bot">
+                            <div class="message-content">
+                                <p>Excellente idée ! Une boutique de vêtements éco-responsables est très pertinente dans le contexte actuel. Comment souhaitez-vous nommer votre boutique ?</p>
+                                <div class="message-time">14:31</div>
+                            </div>
+                        </div>
+                        
+                        <div class="message message-user">
+                            <div class="message-content">
+                                <p>EcoStyle</p>
+                                <div class="message-time">14:32</div>
+                            </div>
+                        </div>
+                        
+                        <div class="message message-bot">
+                            <div class="message-content">
+                                <p>EcoStyle est un excellent nom ! Il est à la fois mémorable et transmet bien votre engagement écologique. Maintenant, parlons de vos produits. Quelles catégories de vêtements éco-responsables souhaitez-vous proposer ? (Par exemple : t-shirts, pulls, robes, accessoires...)</p>
+                                <div class="message-time">14:33</div>
+                            </div>
+                        </div>
+                        
+                        <div class="message message-user">
+                            <div class="message-content">
+                                <p>T-shirts, pulls et accessoires (sacs, bonnets)</p>
+                                <div class="message-time">14:34</div>
+                            </div>
+                        </div>
+                        
+                        <div class="message message-bot">
+                            <div class="message-content">
+                                <p>Parfait ! Je vais créer une structure de boutique avec ces trois catégories : T-shirts, Pulls et Accessoires. Je vais également générer quelques produits exemples pour chaque catégorie.</p>
+                                <p>Souhaitez-vous une palette de couleurs particulière pour votre boutique ? Ou avez-vous une préférence pour le style visuel (minimaliste, coloré, nature, etc.) ?</p>
+                                <div class="message-time">14:35</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <div class="input-container">
+                            <input type="text" placeholder="Écrivez votre message ici...">
+                            <button>Envoyer</button>
+                        </div>
+                        <div class="suggestions">
+                            <div class="suggestion">J'aimerais un style minimaliste</div>
+                            <div class="suggestion">Combien de produits puis-je ajouter ?</div>
+                            <div class="suggestion">Quelles options de paiement proposez-vous ?</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h2>Aperçu de votre boutique</h2>
+                    <div class="control-panel">
+                        <button id="update-preview">Mettre à jour l'aperçu</button>
+                        <button id="export-code">Exporter le code</button>
+                    </div>
+                </div>
+                
+                <div class="preview-content">
+                    <div class="shop-preview active" id="preview">
+                        <div class="shop-header">
+                            <div class="shop-logo">EcoStyle</div>
+                            <div class="shop-nav">
+                                <div class="shop-nav-item">Accueil</div>
+                                <div class="shop-nav-item">T-shirts</div>
+                                <div class="shop-nav-item">Pulls</div>
+                                <div class="shop-nav-item">Accessoires</div>
+                                <div class="shop-nav-item">À propos</div>
+                                <div class="shop-nav-item">Contact</div>
+                            </div>
+                        </div>
+                        
+                        <h2>Nos produits phares</h2>
+                        
+                        <div class="shop-products">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="/api/placeholder/250/180" alt="T-shirt en coton bio">
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-title">T-shirt en coton bio</div>
+                                    <div class="product-price">29,99 €</div>
+                                </div>
+                            </div>
+                            
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="/api/placeholder/250/180" alt="Pull en laine recyclée">
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-title">Pull en laine recyclée</div>
+                                    <div class="product-price">59,99 €</div>
+                                </div>
+                            </div>
+                            
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="/api/placeholder/250/180" alt="Sac en toile de jute">
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-title">Sac en toile de jute</div>
+                                    <div class="product-price">24,99 €</div>
+                                </div>
+                            </div>
+                            
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="/api/placeholder/250/180" alt="Bonnet en coton bio">
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-title">Bonnet en coton bio</div>
+                                    <div class="product-price">19,99 €</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="loader" style="display: none;">
+                        <div class="loader-spinner"></div>
+                        <p>Génération de l'aperçu en cours...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Modal pour configurer le webhook -->
+    <div class="modal" id="webhook-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Configuration de l'agent IA</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="webhook-url">URL du Webhook de votre agent IA</label>
+                    <input type="text" id="webhook-url" placeholder="https://votre-agent-ia.com/webhook">
+                    <div class="webhook-status">
+                        <div class="status-indicator" id="webhook-indicator"></div>
+                        <span id="webhook-status-text">Non connecté</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="api-key">Clé API (optionnel)</label>
+                    <input type="text" id="api-key" placeholder="Entrez votre clé API si nécessaire">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel">Annuler</button>
+                <button class="btn-save">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration globale
+        let webhookUrl = localStorage.getItem('webhookUrl') || '';
+        let apiKey = localStorage.getItem('apiKey') || '';
+        let isWebhookConnected = false;
+        
+        // Pour ouvrir/fermer la modal de configuration
+        document.getElementById('configure-webhook').addEventListener('click', function() {
+            const modal = document.getElementById('webhook-modal');
+            document.getElementById('webhook-url').value = webhookUrl;
+            document.getElementById('api-key').value = apiKey;
+            modal.style.display = 'flex';
+        });
+        
+        document.querySelector('.close-modal').addEventListener('click', function() {
+            document.getElementById('webhook-modal').style.display = 'none';
+        });
+        
+        document.querySelector('.btn-cancel').addEventListener('click', function() {
+            document.getElementById('webhook-modal').style.display = 'none';
+        });
+        
+        // Pour sauvegarder les configurations du webhook
+        document.querySelector('.btn-save').addEventListener('click', function() {
+            webhookUrl = document.getElementById('webhook-url').value.trim();
+            apiKey = document.getElementById('api-key').value.trim();
+            
+            // Sauvegarder dans le localStorage
+            localStorage.setItem('webhookUrl', webhookUrl);
+            localStorage.setItem('apiKey', apiKey);
+            
+            // Tester la connexion
+            if (webhookUrl) {
+                testWebhookConnection();
+            } else {
+                updateWebhookStatus(false);
+            }
+            
+            document.getElementById('webhook-modal').style.display = 'none';
+        });
+        
+        // Tester la connexion au webhook
+        function testWebhookConnection() {
+            const indicator = document.getElementById('webhook-indicator');
+            const statusText = document.getElementById('webhook-status-text');
+            
+            indicator.classList.remove('connected');
+            statusText.textContent = 'Connexion en cours...';
+            
+            // Simuler un test de connexion (dans un cas réel, vous feriez une vraie requête fetch)
+            setTimeout(() => {
+                if (webhookUrl) {
+                    updateWebhookStatus(true);
+                    addMessage("Connexion établie avec votre agent IA. Je suis prêt à vous aider à créer votre boutique en ligne.", 'bot');
+                } else {
+                    updateWebhookStatus(false);
+                }
+            }, 1000);
+        }
+        
+        // Mettre à jour le statut du webhook
+        function updateWebhookStatus(isConnected) {
+            const indicator = document.getElementById('webhook-indicator');
+            const statusText = document.getElementById('webhook-status-text');
+            isWebhookConnected = isConnected;
+            
+            if (isConnected) {
+                indicator.classList.add('connected');
+                statusText.textContent = 'Connecté';
+            } else {
+                indicator.classList.remove('connected');
+                statusText.textContent = 'Non connecté';
+            }
+            
+            // Mettre à jour le statut dans l'en-tête si nécessaire
+            updateHeaderStatus();
+        }
+        
+        // Mettre à jour le statut dans l'en-tête
+        function updateHeaderStatus() {
+            const configButton = document.getElementById('configure-webhook');
+            
+            if (isWebhookConnected) {
+                configButton.innerHTML = '⚙️ Agent IA <span class="agent-status"><span class="status-indicator connected"></span>Connecté</span>';
+            } else {
+                configButton.innerHTML = '⚙️ Configurer l\'agent IA';
+            }
+        }
+        
+        // Pour envoyer des messages à l'agent IA
+        document.querySelector('.input-container button').addEventListener('click', sendMessage);
+        
+        // Permettre l'envoi du message avec la touche Entrée
+        document.querySelector('.input-container input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        function sendMessage() {
+            const input = document.querySelector('.input-container input');
+            const message = input.value.trim();
+            
+            if (message) {
+                // Ajouter le message de l'utilisateur
+                addMessage(message, 'user');
+                
+                // Vider le champ de saisie
+                input.value = '';
+                
+                // Si le webhook est configuré, envoyer au webhook
+                if (webhookUrl && isWebhookConnected) {
+                    sendToWebhook(message);
+                } else {
+                    // Mode simulation si pas de webhook
+                    simulateResponse();
+                }
+            }
+        }
+        
+        // Envoyer le message au webhook
+        function sendToWebhook(message) {
+            // Afficher un indicateur de chargement
+            const messagesContainer = document.querySelector('.chat-messages');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message message-bot loading';
+            loadingDiv.innerHTML = '<div class="message-content"><p>...</p></div>';
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Préparer les données pour l'envoi
+            const data = {
+                message: message,
+                context: {
+                    shopName: "EcoStyle",
+                    shopType: "vêtements éco-responsables",
+                    progress: 35,
+                    currentStep: "Catalogue produits"
+                }
+            };
+            
+            // Configurer les headers pour l'API
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (apiKey) {
+                headers['Authorization'] = `Bearer ${apiKey}`;
+            }
+            
+            // Dans une implémentation réelle, vous feriez ceci:
+            /*
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Supprimer l'indicateur de chargement
+                messagesContainer.removeChild(loadingDiv);
+                
+                // Ajouter la réponse de l'agent
+                if (data && data.response) {
+                    addMessage(data.response, 'bot');
+                    
+                    // Mettre à jour l'aperçu si nécessaire
+                    if (data.shopPreview) {
+                        updateShopPreview(data.shopPreview);
+                    }
+                    
+                    // Mettre à jour la progression si nécessaire
+                    if (data.progress) {
+                        updateProgress(data.progress);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                messagesContainer.removeChild(loadingDiv);
+                addMessage("Désolé, une erreur est survenue lors de la communication avec l'agent IA.", 'bot');
+            });
+            */
+            
+            // Pour la démonstration, simulons une réponse après un délai
+            setTimeout(() => {
+                // Supprimer l'indicateur de chargement
+                messagesContainer.removeChild(loadingDiv);
+                simulateResponse();
+            }, 1500);
+        }
+        
+        // Simuler une réponse de l'IA
+        function simulateResponse() {
+            const responses = [
+                "Je comprends votre préférence pour un style minimaliste. Je vais adapter le design de votre boutique en conséquence avec des couleurs neutres et une mise en page épurée.",
+                "Vous pouvez ajouter autant de produits que vous le souhaitez. Pour commencer, je vous recommande d'avoir au moins 3-5 produits par catégorie.",
+                "Excellent choix ! Je vais travailler sur une palette de couleurs naturelles qui reflète bien l'aspect éco-responsable de votre marque.",
+                "Je peux intégrer plusieurs options de paiement comme PayPal, Stripe et les cartes bancaires. Nous configurerons cela dans l'étape des paiements."
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            addMessage(randomResponse, 'bot');
+        }
+        
+        // Pour ajouter un message à la conversation
+        function addMessage(text, type) {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const timeStr = `${hours}:${minutes}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <p>${text}</p>
+                    <div class="message-time">${timeStr}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Pour les suggestions de messages
+        document.querySelectorAll('.suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', function() {
+                document.querySelector('.input-container input').value = this.textContent;
+            });
+        });
+        
+        // Pour mettre à jour l'aperçu
+        document.getElementById('update-preview').addEventListener('click', function() {
+            const loader = document.querySelector('.loader');
+            loader.style.display = 'flex';
+            
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 2000);
+        });
+        
+        // Pour exporter le code
+        document.getElementById('export-code').addEventListener('click', function() {
+            alert('Le code de votre boutique a été exporté et est prêt à être déployé !');
+        });
+        
+        // Vérifier si un webhook est déjà configuré au chargement
+        window.addEventListener('DOMContentLoaded', function() {
+            if (webhookUrl) {
+                testWebhookConnection();
+            }
+        });
+    </script>
+</body>
+</html>
